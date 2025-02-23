@@ -8,7 +8,7 @@ Pour installer et exécuter ce projet localement, suivez les étapes ci-dessous 
 
 1. Clonez le dépôt :
     ```bash
-    git clone <URL_DU_DEPOT>
+    git clone https://github.com/cysegerie/vue-tgc
     ```
 2. Accédez au répertoire du projet :
     ```bash
