@@ -4,7 +4,7 @@ import App from './App.vue'
 import OpenBooster from "@/components/OpenBooster.vue";
 import AllMyCards from "@/components/AllMyCards.vue";
 import MyDecks from "@/components/MyDecks.vue";
-import {createRouter, createWebHistory} from "vue-router";
+import { createRouter, createWebHistory } from "vue-router";
 import Home from "@/components/Home.vue";
 
 
