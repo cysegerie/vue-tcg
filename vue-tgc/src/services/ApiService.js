@@ -5,7 +5,7 @@ async function apiGet(resource) {
 }
 
 async function apiPost(resource, data) {
-    const response = await fetch(`${this.baseURL}/${resource}`, {
+    const response = await fetch(resource, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -16,7 +16,7 @@ async function apiPost(resource, data) {
 }
 
 async function apiUpdate(resource, data) {
-    const response = await fetch(`${this.baseURL}/${resource}`, {
+    const response = await fetch(resource, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json'
@@ -27,7 +27,7 @@ async function apiUpdate(resource, data) {
 }
 
 async function apiDelete(resource) {
-    const response = await fetch(`${this.baseURL}/${resource}`, {
+    const response = await fetch(resource, {
         method: 'DELETE'
     });
     return response.json();
