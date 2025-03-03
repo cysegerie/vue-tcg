@@ -20,7 +20,7 @@ Pour installer et exécuter ce projet localement, suivez les étapes ci-dessous 
     ```
 4. Démarrez le serveur de développement :
     ```bash
-    npm run serve
+    npm run dev
     ```
 
 ## Utilisation
