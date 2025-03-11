@@ -1,5 +1,5 @@
 <script setup>
-import NavBar from "./components/LienService.vue";
+import NavBar from "./components/NavBar.vue";
 import { RouterView } from 'vue-router';
 
 console.log("NavBar Loaded", NavBar);

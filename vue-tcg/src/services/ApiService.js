@@ -1,10 +1,9 @@
-async function apiGet(resource) {
-    const url = new URL(`${this.baseURL}/${resource}`);
-    const response = await fetch(url);
+export async function apiGet(resource) {
+    const response = await fetch(resource);
     return response.json();
 }
 
-async function apiPost(resource, data) {
+export async function apiPost(resource, data) {
     const response = await fetch(resource, {
         method: 'POST',
         headers: {
@@ -15,7 +14,7 @@ async function apiPost(resource, data) {
     return response.json();
 }
 
-async function apiUpdate(resource, data) {
+export async function apiUpdate(resource, data) {
     const response = await fetch(resource, {
         method: 'PUT',
         headers: {
@@ -26,11 +25,11 @@ async function apiUpdate(resource, data) {
     return response.json();
 }
 
-async function apiDelete(resource) {
+export async function apiDelete(resource) {
     const response = await fetch(resource, {
         method: 'DELETE'
     });
     return response.json();
 }
 
-export default { apiGet, apiPost, apiUpdate, apiDelete };
+
