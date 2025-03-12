@@ -1,61 +1,50 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
-import { fetchCards } from '@/services/CardService.js';
+import { ref, onMounted } from 'vue';
+import { fetchCardsByPage } from '@/services/CardService.js';
 import { RouterLink } from 'vue-router';
 
-// faudra refaire la pagination pcq c'est pas comme ça bleh
+// fix ts
 
 const isLoading = ref(true);
 const cards = ref([]);
-const currentPage = ref(1);
 const itemsPerPage = 20;
 
-const paginatedCards = computed(() => {
-    const start = (currentPage.value - 1) * itemsPerPage;
-    const end = start + itemsPerPage;
-    return cards.value.slice(start, end);
-});
-
-const totalPages = computed(() => {
-    return Math.ceil(cards.value.length / itemsPerPage);
+const props = defineProps({
+    currentPage: {type: Number, default: 1}
 });
 
 onMounted(async () => {
     isLoading.value = true;
-    cards.value = await fetchCards();
+    cards.value = await fetchCardsByPage(props.currentPage, itemsPerPage);
     isLoading.value = false;
 });
 
-const nextPage = () => {
-    if (currentPage.value < totalPages.value) {
-        currentPage.value++;
-    }
-};
-
-const prevPage = () => {
-    if (currentPage.value > 1) {
-        currentPage.value--;
-    }
-};
 </script>
 
 <template>
     <div>
         <h1 class="h1-title">All My Cards</h1>
         <div v-if="isLoading">Loading...</div>
+        <div v-else-if="cards.length <= 0">
+            <p>No cards found</p>
+        </div>
         <div v-else>
             <div class="cards-container">
-                <div v-for="card in paginatedCards" :key="card.id" class="card-item">
-                        <RouterLink :to="`/cards/${card.id}`" class="card-link">
-                            <img :src="`${card.image}/low.jpg`" alt="Card Image" />
-                            <p>{{ card.name }}</p>
-                        </RouterLink>
-                </div>
+            <div v-for="card in cards" :key="card.id" class="card-item">
+                <RouterLink :to="`/cards/${card.id}`" class="card-link">
+                <img :src="`${card.image}/low.jpg`" alt="Card Image" />
+                <p>{{ card.name }}</p>
+                </RouterLink>
+            </div>
             </div>
             <div class="pagination">
-                <button @click="prevPage" :disabled="currentPage === 1">Previous</button>
-                <span>Page {{ currentPage }} of {{ totalPages }}</span>
-                <button @click="nextPage" :disabled="currentPage === totalPages">Next</button>
+            <RouterLink v-if="props.currentPage != 1" :to="`/all-my-cards/${props.currentPage - 1}`">
+                <button :disabled="props.currentPage === 1">Previous</button>
+            </RouterLink>
+            <span>{{ props.currentPage }}</span>
+            <RouterLink :to="`/all-my-cards/${props.currentPage + 1}`">
+                <button>Next</button>
+            </RouterLink>
             </div>
         </div>
     </div>
@@ -68,7 +57,6 @@ const prevPage = () => {
 }
 .card-link:hover {
     text-decoration: underline;
-    color: #ff6347;
 }
 .h1-title {
     text-align: center;

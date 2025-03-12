@@ -10,11 +10,11 @@ import SelectedCard from "@/components/SelectedCard.vue";
 
 
 const routes = [
-    { path: '/', component: Home},
-    { path: '/open-booster', component: OpenBooster},
-    { path: '/all-my-cards', component: AllMyCards},
-    { path: '/my-decks', component: MyDecks},
-    { path: '/cards/:id', component: SelectedCard, props: true},
+  { path: '/', component: Home},
+  { path: '/open-booster', component: OpenBooster},
+  { path: '/all-my-cards/:currentPage?', component: AllMyCards, props: true},
+  { path: '/my-decks', component: MyDecks},
+  { path: '/cards/:id', component: SelectedCard, props: true},
   ];
 const router = createRouter({
     history: createWebHistory(),
