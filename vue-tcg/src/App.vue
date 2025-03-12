@@ -10,7 +10,6 @@ console.log("NavBar Loaded", NavBar);
   <header>
     <NavBar/>
   </header>
-
   <main>
     <RouterView />
   </main>

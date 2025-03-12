@@ -6,6 +6,7 @@ import AllMyCards from "@/components/AllMyCards.vue";
 import MyDecks from "@/components/MyDecks.vue";
 import { createRouter, createWebHistory } from "vue-router";
 import Home from "@/components/Home.vue";
+import SelectedCard from "@/components/SelectedCard.vue";
 
 
 const routes = [
@@ -13,6 +14,7 @@ const routes = [
     { path: '/open-booster', component: OpenBooster},
     { path: '/all-my-cards', component: AllMyCards},
     { path: '/my-decks', component: MyDecks},
+    { path: '/cards/:id', component: SelectedCard, props: true},
   ];
 const router = createRouter({
     history: createWebHistory(),

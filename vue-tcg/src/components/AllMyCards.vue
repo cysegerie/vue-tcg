@@ -1,11 +1,14 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { fetchCards } from '@/services/CardService.js';
+import { RouterLink } from 'vue-router';
+
+// faudra refaire la pagination pcq c'est pas comme ça bleh
 
 const isLoading = ref(true);
 const cards = ref([]);
 const currentPage = ref(1);
-const itemsPerPage = 20; // Augmenter le nombre d'éléments par page
+const itemsPerPage = 20;
 
 const paginatedCards = computed(() => {
     const start = (currentPage.value - 1) * itemsPerPage;
@@ -43,8 +46,10 @@ const prevPage = () => {
         <div v-else>
             <div class="cards-container">
                 <div v-for="card in paginatedCards" :key="card.id" class="card-item">
-                    <img :src="`${card.image}/low.jpg`" alt="image" />
-                    <p>{{ card.name }}</p>
+                        <RouterLink :to="`/cards/${card.id}`">
+                            <img :src="`${card.image}/low.jpg`" alt="Card Image" />
+                            <p>{{ card.name }}</p>
+                        </RouterLink>
                 </div>
             </div>
             <div class="pagination">
