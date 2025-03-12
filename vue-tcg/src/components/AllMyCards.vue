@@ -46,7 +46,7 @@ const prevPage = () => {
         <div v-else>
             <div class="cards-container">
                 <div v-for="card in paginatedCards" :key="card.id" class="card-item">
-                        <RouterLink :to="`/cards/${card.id}`">
+                        <RouterLink :to="`/cards/${card.id}`" class="card-link">
                             <img :src="`${card.image}/low.jpg`" alt="Card Image" />
                             <p>{{ card.name }}</p>
                         </RouterLink>
@@ -62,6 +62,14 @@ const prevPage = () => {
 </template>
 
 <style scoped>
+.card-link {
+    text-decoration: none;
+    color: #fff;
+}
+.card-link:hover {
+    text-decoration: underline;
+    color: #ff6347;
+}
 .h1-title {
     text-align: center;
     margin-bottom: 1rem;
