@@ -1,53 +1,59 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { fetchCardsByPage } from '@/services/CardService.js';
 import { RouterLink } from 'vue-router';
 
-// fix ts
-
 const isLoading = ref(true);
 const cards = ref([]);
-const itemsPerPage = 20;
+const itemsPerPageOptions = [10, 25, 50];
+const itemsPerPage = ref(itemsPerPageOptions[0]);
+const currentPage = ref(1);
 
-const props = defineProps({
-    currentPage: {type: Number, default: 1}
-});
-
-onMounted(async () => {
+function loadCards(page) {
     isLoading.value = true;
-    cards.value = await fetchCardsByPage(props.currentPage, itemsPerPage);
-    isLoading.value = false;
+
+    fetchCardsByPage(page, itemsPerPage).then((data) => {
+        cards.value = data;
+        isLoading.value = false;
+    });
+}
+
+onMounted(() => {
+    loadCards(currentPage.value);
 });
 
+
+watch([currentPage, itemsPerPage], ([newPage, newItemsPerPage], [oldPage, oldItemsPerPage]) => {
+    loadCards(newPage);
+});
+    
 </script>
 
 <template>
     <div>
         <h1 class="h1-title">All My Cards</h1>
         <div v-if="isLoading">Loading...</div>
-        <div v-else-if="cards.length <= 0">
-            <p>No cards found</p>
-        </div>
         <div v-else>
+            <select v-model="itemsPerPage">
+                <option v-for="itemp in itemsPerPageOptions" :key="itemp" :value="itemp">
+                    {{ itemp }}
+                </option>
+            </select>
             <div class="cards-container">
-            <div v-for="card in cards" :key="card.id" class="card-item">
-                <RouterLink :to="`/cards/${card.id}`" class="card-link">
-                <img :src="`${card.image}/low.jpg`" alt="Card Image" />
-                <p>{{ card.name }}</p>
-                </RouterLink>
-            </div>
+                <div v-for="card in cards" :key="card.id" class="card-item">
+                    <RouterLink :to="`/cards/${card.id}`" class="card-link">
+                        <img :src="`${card.image}/low.jpg`" alt="Card Image" />
+                        <p>{{ card.name }}</p>
+                    </RouterLink>
+                </div>
             </div>
             <div class="pagination">
-            <RouterLink v-if="props.currentPage != 1" :to="`/all-my-cards/${props.currentPage - 1}`">
-                <button :disabled="props.currentPage === 1">Previous</button>
-            </RouterLink>
-            <span>{{ props.currentPage }}</span>
-            <RouterLink :to="`/all-my-cards/${props.currentPage + 1}`">
-                <button>Next</button>
-            </RouterLink>
+                <button :disabled="currentPage === 1" @click="currentPage -= 1">Previous</button>
+                <span>Page {{ currentPage }}</span>
+                <button :disabled="cards.length < itemp" @click="currentPage += 1">Next</button>
             </div>
         </div>
-    </div>
+    </div>  
 </template>
 
 <style scoped>
@@ -57,6 +63,7 @@ onMounted(async () => {
 }
 .card-link:hover {
     text-decoration: underline;
+    color: #ff6347;
 }
 .h1-title {
     text-align: center;
@@ -65,17 +72,17 @@ onMounted(async () => {
 .cards-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem; /* Réduire l'espace entre les cartes */
+    gap: 0.5rem; 
     justify-content: center;
 }
 
 .card-item {
     background-color: #333;
     color: #fff;
-    padding: 0.5rem; /* Réduire le padding */
+    padding: 0.5rem;
     border-radius: 8px;
     text-align: center;
-    width: calc(100% / 5 - 1rem); /* Réduire la largeur des cartes */
+    width: calc(100% / 5 - 1rem);
 }
 
 .card-item img {
