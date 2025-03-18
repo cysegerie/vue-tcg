@@ -7,12 +7,13 @@ const isLoading = ref(true);
 const cards = ref([]);
 const itemsPerPageOptions = [10, 25, 50];
 const itemsPerPage = ref(itemsPerPageOptions[0]);
+
 const currentPage = ref(1);
 
 function loadCards(page) {
     isLoading.value = true;
 
-    fetchCardsByPage(page, itemsPerPage).then((data) => {
+    fetchCardsByPage(page, itemsPerPage.value).then((data) => {
         cards.value = data;
         isLoading.value = false;
     });
@@ -34,11 +35,18 @@ watch([currentPage, itemsPerPage], ([newPage, newItemsPerPage], [oldPage, oldIte
         <h1 class="h1-title">All My Cards</h1>
         <div v-if="isLoading">Loading...</div>
         <div v-else>
-            <select v-model="itemsPerPage">
-                <option v-for="itemp in itemsPerPageOptions" :key="itemp" :value="itemp">
-                    {{ itemp }}
-                </option>
-            </select>
+            <div class="pagination">
+                <select v-model="itemsPerPage">
+                    <option v-for="itemp in itemsPerPageOptions" :key="itemp" :value="itemp">
+                        {{ itemp }}
+                    </option>
+                </select>
+                <div class="pagination-trucs">
+                    <button :disabled="currentPage === 1" @click="currentPage -= 1">Previous</button>
+                    <span>Page {{ currentPage }}</span>
+                    <button :disabled="cards.length < itemp" @click="currentPage += 1">Next</button>
+                </div>
+            </div>
             <div class="cards-container">
                 <div v-for="card in cards" :key="card.id" class="card-item">
                     <RouterLink :to="`/cards/${card.id}`" class="card-link">
@@ -46,11 +54,6 @@ watch([currentPage, itemsPerPage], ([newPage, newItemsPerPage], [oldPage, oldIte
                         <p>{{ card.name }}</p>
                     </RouterLink>
                 </div>
-            </div>
-            <div class="pagination">
-                <button :disabled="currentPage === 1" @click="currentPage -= 1">Previous</button>
-                <span>Page {{ currentPage }}</span>
-                <button :disabled="cards.length < itemp" @click="currentPage += 1">Next</button>
             </div>
         </div>
     </div>  
@@ -92,9 +95,20 @@ watch([currentPage, itemsPerPage], ([newPage, newItemsPerPage], [oldPage, oldIte
 
 .pagination {
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     margin-top: 1rem;
+    margin-bottom: 1rem;
+    gap: 0.5rem;
+}
+
+.pagination select {
+    padding: 0.5rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    color: #333;
 }
 
 .pagination button {
@@ -102,7 +116,6 @@ watch([currentPage, itemsPerPage], ([newPage, newItemsPerPage], [oldPage, oldIte
     color: #fff;
     border: none;
     padding: 0.5rem 1rem;
-    margin: 0 0.5rem;
     border-radius: 8px;
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.3s ease;
@@ -116,5 +129,12 @@ watch([currentPage, itemsPerPage], ([newPage, newItemsPerPage], [oldPage, oldIte
 .pagination button:disabled {
     background-color: #555;
     cursor: not-allowed;
+}
+
+.pagination-trucs{
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-right: 1.5rem;
 }
 </style>
