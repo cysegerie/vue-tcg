@@ -13,3 +13,14 @@ export async function fetchCards(id) {
     }
 };
 
+export async function fetchCardsByPage(page, itemsPerPage) {
+    try {
+        const url = `${BASE_API_CARDS}?pagination:page=${page}&pagination:itemsPerPage=${itemsPerPage}`;
+        const response = await apiGet(url);
+        console.log('Cards fetched:', response);
+        return response;
+    } catch (error) {
+        console.error('Error fetching cards:', error);
+        throw error;
+    }
+}
