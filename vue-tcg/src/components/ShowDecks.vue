@@ -48,7 +48,7 @@ onMounted(() => {
     <div class="cards-container">
       <div v-for="card in deck.cards" :key="card.id" class="card-item">
         <RouterLink :to="`/cards/${card.id}`" class="card-link">
-          <img :src="`${card.image}/low.jpg`" alt="Card Image" />
+          <img :src="card.image ? `${card.image}/low.jpg` : '/placeholder.jpg'" alt="Card Image" />
           <p>{{ card.name }}</p>
         </RouterLink>
       </div>
