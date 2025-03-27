@@ -3,6 +3,8 @@
 import {ref, watch} from 'vue';
 import { fetchCards } from '@/services/CardService.js';
 
+// Bon je vais tout refaire quand j'aurais fini les decks pcq j'ai pas fait avec l'api
+
 
 const randomCards = ref([]);
 const exCards = ref([]);
