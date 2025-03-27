@@ -1,4 +1,3 @@
-<!-- vue-tcg/src/components/SearchBar.vue -->
 <template>
   <div>
     <input v-model="query" @input="searchCards" placeholder="Search Pokémon" />
@@ -8,6 +7,7 @@
         <p>{{ card.name }}</p>
       </div>
     </div>
+    <div v-else-if="query.length > 2">No cards found</div>
   </div>
 </template>
 
@@ -23,6 +23,7 @@ const searchCards = async () => {
   if (query.value.length > 2) {
     try {
       const response = await apiGet(`${BASE_API_CARDS}?name=${query.value}`);
+      console.log('API response:', response.data); // Debugging log
       cards.value = response.data;
     } catch (error) {
       console.error('Error fetching cards:', error);
