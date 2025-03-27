@@ -56,6 +56,7 @@ watch(exCards, (newExCards) => {
 
   <button class="booster-btn" @click="deleteLocalStorage">Delete all my cards</button>
 
+
   <!-- <button @click="openExBooster">Open Ex Booster</button> -->
 
   <div v-if="randomCards.length">

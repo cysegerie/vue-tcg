@@ -52,72 +52,99 @@ onMounted(() => {
 </script>
 
 <template>
-  <div>
+  <div class="container">
     <SearchBar />
-    <h1>My Decks</h1>
-    <div>
+    <h1 class="title">My Decks</h1>
+    <div class="add-deck-form">
       <h2>Add New Deck</h2>
       <div v-if="errorMessage" class="error">{{ errorMessage }}</div>
-      <input v-model="newDeckName" placeholder="Deck Name" />
-      <input v-model="newDeckCards" placeholder="Card IDs (comma separated)" />
-      <button @click="addDeck">Add Deck</button>
+      <input v-model="newDeckName" placeholder="Deck Name" class="input" />
+      <input v-model="newDeckCards" placeholder="Card IDs (comma separated)" class="input" />
+      <button @click="addDeck" class="add-button">Add Deck</button>
     </div>
+    <ul class="deck-list">
+      <li v-for="deck in decks" :key="deck.id" @click="goToShowDecks(deck.id)" class="deck-item">
+        {{ deck.name }}
+      </li>
+    </ul>
   </div>
-  <ul>
-    <li v-for="deck in decks" :key="deck.id" @click="goToShowDecks(deck.id)">
-      {{ deck.name }}
-    </li>
-  </ul>
 </template>
 
 <style scoped>
-ul {
-  list-style-type: none;
-  padding: 0;
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
 }
 
-li {
-  background-color: #f8f9fa;
+.title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 2rem;
+  color: #333;
+}
+
+.add-deck-form {
+  width: 100%;
+  max-width: 500px;
+  margin-bottom: 2rem;
+}
+
+.input {
+  display: block;
+  width: 100%;
+  max-width: 500px;
   margin: 0.5rem 0;
-  padding: 0.5rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+.add-button {
+  background-color: #ff6347;
+  color: #fff;
+  border: none;
+  padding: 0.75rem 1.5rem;
   border-radius: 8px;
   cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  display: block;
+  margin: 1rem auto;
 }
 
-li:hover {
-  background-color: #e2e6ea;
+.add-button:hover {
+  background-color: #e5533d;
+  transform: scale(1.05);
 }
 
 .error {
   color: red;
-  margin-bottom: 0.5rem;
+  margin-bottom: 1rem;
 }
 
-input {
-  display: block;
+.deck-list {
+  list-style-type: none;
+  padding: 0;
+  width: 100%;
+  max-width: 500px;
+}
+
+.deck-item {
+  background-color: #f8f9fa;
   margin: 0.5rem 0;
-  padding: 0.5rem;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-}
-
-button {
-  background-color: #333;
-  color: #fff;
-  border: none;
-  padding: 0.5rem 1rem;
+  padding: 1rem;
   border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.3s ease;
+  font-size: 1.2rem;
+  transition: background-color 0.3s ease;
 }
 
-button:hover {
-  background-color: #ff6347;
-  transform: scale(1.1);
-}
-
-.card-item img {
-  max-width: 100%;
-  border-radius: 8px;
+.deck-item:hover {
+  background-color: #e2e6ea;
 }
 </style>
