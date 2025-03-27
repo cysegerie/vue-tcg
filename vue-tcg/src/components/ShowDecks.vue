@@ -64,10 +64,12 @@ onMounted(() => {
   text-decoration: none;
   color: #fff;
 }
+
 .card-link:hover {
   text-decoration: underline;
   color: #ff6347;
 }
+
 .cards-container {
   display: flex;
   flex-wrap: wrap;
