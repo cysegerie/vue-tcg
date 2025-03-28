@@ -1,10 +1,11 @@
 <script setup>
-import { ref, onMounted} from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 
 const boosters = ref([]);
 const selectedCard = ref(null);
 const loading = ref(false);
 const error = ref(null);
+const storedCards = ref([]);
 
 // Charger la liste des boosters
 const fetchBoosters = async () => {
@@ -35,26 +36,34 @@ const openBooster = async (booster) => {
     console.log("Carte récupérée :", card);
     selectedCard.value = card;
 
-    // Forcer la mise à jour du DOM après l'assignation
-    nextTick(() => {
-      loading.value = false;
-    });
-
     // Sauvegarde dans le localStorage
-    const storedCards = JSON.parse(localStorage.getItem('boosterCards')) || [];
-    localStorage.setItem('boosterCards', JSON.stringify([...storedCards, card]));
+    const stored = JSON.parse(localStorage.getItem('boosterCards')) || [];
+    stored.push(card);
+    localStorage.setItem('boosterCards', JSON.stringify(stored));
+    storedCards.value = stored;
   } catch (error) {
     console.error(`Erreur lors de la récupération de la carte ${randomCardId} :`, error);
   }
+
+  loading.value = false;
+};
+
+// Récupérer les cartes stockées
+const loadStoredCards = () => {
+  storedCards.value = JSON.parse(localStorage.getItem('boosterCards')) || [];
 };
 
 // Supprimer les cartes stockées
 const clearLocalStorage = () => {
   localStorage.removeItem('boosterCards');
   selectedCard.value = null;
+  storedCards.value = [];
 };
 
-onMounted(fetchBoosters);
+onMounted(() => {
+  fetchBoosters();
+  loadStoredCards();
+});
 </script>
 
 <template>
@@ -83,6 +92,8 @@ onMounted(fetchBoosters);
     </div>
   </div>
 
+
+
   <button @click="clearLocalStorage" class="clear-button">Supprimer toutes mes cartes</button>
 </template>
 
@@ -108,7 +119,7 @@ onMounted(fetchBoosters);
   background-color: #0056b3;
 }
 
-.card-container {
+.card-container, .stored-cards-container {
   text-align: center;
 }
 
@@ -162,5 +173,12 @@ onMounted(fetchBoosters);
   color: red;
   font-weight: bold;
   text-align: center;
+}
+
+.cards-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
 }
 </style>
