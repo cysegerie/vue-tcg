@@ -3,6 +3,8 @@
 import {ref, watch} from 'vue';
 import { fetchCards } from '@/services/CardService.js';
 
+// Bon je vais tout refaire quand j'aurais fini les decks pcq j'ai pas fait avec l'api
+
 
 const randomCards = ref([]);
 const exCards = ref([]);
@@ -48,27 +50,24 @@ watch(exCards, (newExCards) => {
 </script>
 
 <template>
-  <h1>Open Booster</h1>
+  <h1 class="title">Open Booster</h1>
 
-  <button @click="openRandomBooster">Open Random Booster</button>
+  <button class="booster-btn" @click="openRandomBooster">Open Random Booster</button>
+
+  <button class="booster-btn" @click="deleteLocalStorage">Delete all my cards</button>
 
 
   <!-- <button @click="openExBooster">Open Ex Booster</button> -->
 
-
   <div v-if="randomCards.length">
-    <h2>Random Booster Cards</h2>
+    <h2 style="text-align: center;">Vous avez eu un :</h2>
     <div class="cards-container">
       <div v-for="card in randomCards" :key="card.id" class="card-item">
-        <img :src="`${card.image}/low.jpg`" alt="image" />
+        <img :src="card.image ? `${card.image}/low.jpg` : '/placeholder.jpg'" alt="image" />
         <p>{{ card.name }}</p>
       </div>
     </div>
   </div>
-
-
-  <button @click="deleteLocalStorage">Delete all my cards</button>
-
 
 </template>
 
@@ -110,5 +109,31 @@ watch(exCards, (newExCards) => {
 .nav-link:hover {
   color: #ff6347;
   transform: scale(1.1);
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.booster-btn {
+  background-color: #ff6347;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  display: block;
+  margin: 0 auto 1rem;
+}
+
+.open-booster-btn:hover {
+  background-color: #e5533d;
+  transform: scale(1.05);
 }
 </style>
