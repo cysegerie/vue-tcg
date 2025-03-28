@@ -1,82 +1,115 @@
 <script setup>
+import { ref, onMounted} from 'vue';
 
-import {ref, watch} from 'vue';
-import { fetchCards } from '@/services/CardService.js';
+const boosters = ref([]);
+const selectedCard = ref(null);
+const loading = ref(false);
+const error = ref(null);
 
-// Bon je vais tout refaire quand j'aurais fini les decks pcq j'ai pas fait avec l'api
-
-
-const randomCards = ref([]);
-const exCards = ref([]);
-
-const openRandomBooster = async () => {
-
-  const allCards = await fetchCards();
-  randomCards.value = allCards.sort(() => 0.5 - Math.random()).slice(0, 1);
-
-
+// Charger la liste des boosters
+const fetchBoosters = async () => {
+  try {
+    const response = await fetch('https://67b8eac151192bd378dc35a6.mockapi.io/boosters');
+    boosters.value = await response.json();
+  } catch (error) {
+    console.error('Erreur lors de la récupération des boosters :', error);
+  }
 };
 
-watch(randomCards, (newCards) => {
-  const storedCards = JSON.parse(window.localStorage.getItem('randomCards')) || [];
-  const updatedCards = [...storedCards, ...newCards];
-  window.localStorage.setItem('randomCards', JSON.stringify(updatedCards));
-});
+// Tirer une seule carte d'un booster
+const openBooster = async (booster) => {
+  loading.value = true;
+  selectedCard.value = null;
 
-const deleteLocalStorage = () => {
-  window.localStorage.removeItem('randomCards');
-  randomCards.value = [];
+  if (!booster.cards || booster.cards.length === 0) {
+    console.error('Aucune carte disponible dans ce booster');
+    loading.value = false;
+    return;
+  }
+
+  const randomCardId = booster.cards[Math.floor(Math.random() * booster.cards.length)];
+
+  try {
+    const response = await fetch(`https://api.tcgdex.net/v2/fr/cards/${randomCardId}`);
+    const card = await response.json();
+    console.log("Carte récupérée :", card);
+    selectedCard.value = card;
+
+    // Forcer la mise à jour du DOM après l'assignation
+    nextTick(() => {
+      loading.value = false;
+    });
+
+    // Sauvegarde dans le localStorage
+    const storedCards = JSON.parse(localStorage.getItem('boosterCards')) || [];
+    localStorage.setItem('boosterCards', JSON.stringify([...storedCards, card]));
+  } catch (error) {
+    console.error(`Erreur lors de la récupération de la carte ${randomCardId} :`, error);
+  }
 };
 
-
-/* i've try to create another lsit in local storage for ex cards but it doesn't work because all is going into the same list
-const openExBooster = async () => {
-  const allExCards = await fetchCards();
-  const exCards = allExCards.filter(card => / ex$/i.test(card.name));
-  randomCards.value = exCards.sort(() => 0.5 - Math.random()).slice(0, 1);
-
+// Supprimer les cartes stockées
+const clearLocalStorage = () => {
+  localStorage.removeItem('boosterCards');
+  selectedCard.value = null;
 };
 
-
-watch(exCards, (newExCards) => {
-  const storedExCards = JSON.parse(window.localStorage.getItem('exCards')) || [];
-  const updatedExCards = [...storedExCards, ...newExCards];
-  window.localStorage.setItem('exCards', JSON.stringify(updatedExCards));
-});
-*/
-
-
-
+onMounted(fetchBoosters);
 </script>
 
 <template>
-  <h1 class="title">Open Booster</h1>
+  <h1>Ouvrir un Booster</h1>
 
-  <button class="booster-btn" @click="openRandomBooster">Open Random Booster</button>
+  <div v-if="error" class="error">{{ error }}</div>
 
-  <button class="booster-btn" @click="deleteLocalStorage">Delete all my cards</button>
-
-
-  <!-- <button @click="openExBooster">Open Ex Booster</button> -->
-
-  <div v-if="randomCards.length">
-    <h2 style="text-align: center;">Vous avez eu un :</h2>
-    <div class="cards-container">
-      <div v-for="card in randomCards" :key="card.id" class="card-item">
-        <img :src="card.image ? `${card.image}/low.jpg` : '/placeholder.jpg'" alt="image" />
-        <p>{{ card.name }}</p>
-      </div>
+  <div v-if="boosters.length">
+    <h2>Choisissez un Booster</h2>
+    <div class="boosters-container">
+      <button v-for="booster in boosters" :key="booster.id" @click="openBooster(booster)" class="booster-button">
+        {{ booster.name }}
+      </button>
     </div>
   </div>
 
+  <div v-if="loading" class="loading">Chargement...</div>
+
+  <div v-if="selectedCard" class="card-container">
+    <h2>Carte obtenue</h2>
+    <div class="card-item">
+      <RouterLink :to="`/cards/${selectedCard.id}`" class="card-link">
+        <img :src="selectedCard.image ? `${selectedCard.image}/low.jpg` : '/placeholder.jpg'" alt="Card Image" />
+        <p>{{ selectedCard.name }}</p>
+      </RouterLink>
+    </div>
+  </div>
+
+  <button @click="clearLocalStorage" class="clear-button">Supprimer toutes mes cartes</button>
 </template>
 
 <style scoped>
-.cards-container {
+.boosters-container {
   display: flex;
+  gap: 1rem;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.booster-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.booster-button:hover {
+  background-color: #0056b3;
+}
+
+.card-container {
+  text-align: center;
 }
 
 .card-item {
@@ -85,7 +118,8 @@ watch(exCards, (newExCards) => {
   padding: 0.5rem;
   border-radius: 8px;
   text-align: center;
-  width: calc(100% / 5 - 1rem);
+  width: 200px;
+  margin: auto;
 }
 
 .card-item img {
@@ -93,47 +127,40 @@ watch(exCards, (newExCards) => {
   border-radius: 8px;
 }
 
-.nav-link {
-  color: #fff;
+.card-link {
   text-decoration: none;
-  font-size: 1.2rem;
-  transition: color 0.3s ease, transform 0.3s ease;
-  background-color: #333;
+  color: #fff;
+}
+
+.card-link:hover {
+  text-decoration: underline;
+  color: #ff6347;
+}
+
+.clear-button {
+  background-color: #dc3545;
+  color: white;
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 8px;
   cursor: pointer;
-  margin: 0.5rem;
+  margin-top: 1rem;
+  transition: background 0.3s ease;
 }
 
-.nav-link:hover {
-  color: #ff6347;
-  transform: scale(1.1);
+.clear-button:hover {
+  background-color: #a71d2a;
 }
 
-.title {
-  font-size: 2rem;
+.loading {
+  text-align: center;
+  font-weight: bold;
+  color: #007bff;
+}
+
+.error {
+  color: red;
   font-weight: bold;
   text-align: center;
-  margin-bottom: 1rem;
-  color: #333;
-}
-
-.booster-btn {
-  background-color: #ff6347;
-  color: #fff;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: background-color 0.3s ease, transform 0.3s ease;
-  display: block;
-  margin: 0 auto 1rem;
-}
-
-.open-booster-btn:hover {
-  background-color: #e5533d;
-  transform: scale(1.05);
 }
 </style>
