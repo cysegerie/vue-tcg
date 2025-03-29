@@ -10,6 +10,7 @@ import MyDecks from "@/components/MyDecks.vue";
 import Home from "@/components/Home.vue";
 import SelectedCard from "@/components/SelectedCard.vue";
 import ShowDecks from "@/components/ShowDecks.vue";
+import CreateDeckWithMyCards from "@/components/CreateDeckWithMyCards.vue";
 
 const routes = [
     { path: '/', component: Home },
@@ -17,13 +18,16 @@ const routes = [
     { path: '/all-my-cards', component: AllMyCards },
     { path: '/my-decks', component: MyDecks },
     { path: '/cards/:id', component: SelectedCard, props: true },
-    { path: '/show-decks/:deckId', name: 'ShowDecks', component: ShowDecks }
+    { path: '/show-decks/:deckId', name: 'ShowDecks', component: ShowDecks },
+    { path: '/create-deck', component: CreateDeckWithMyCards }
 ];
 
 const router = createRouter({
     history: createWebHistory(),
     routes,
 });
+
+export default router;
 
 createApp(App)
     .use(router)

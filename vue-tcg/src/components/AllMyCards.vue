@@ -65,7 +65,7 @@ watch(currentPage, async (newPage) => {
                 </select>
                 <div class="pagination-trucs">
                     <button :disabled="currentPage === 1" @click="currentPage -= 1">Previous</button>
-                    <span>Page {{ currentPage }}</span>
+                    <span>Page {{ currentPage }}</span>0
                     <button :disabled="isLoading" @click="currentPage += 1">Next</button>
                 </div>
             </div>

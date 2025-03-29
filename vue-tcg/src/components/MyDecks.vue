@@ -2,8 +2,7 @@
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { BASE_API_DECKS } from '@/utilities/const.js';
-import { apiGet, apiPost } from '@/services/ApiService.js';
-import SearchBar from '@/components/SearchBar.vue';
+import { apiGet, apiPost, apiDelete } from '@/services/ApiService.js';
 
 const decks = ref([]);
 const router = useRouter();
@@ -46,6 +45,26 @@ const goToShowDecks = (deckId) => {
   router.push({ name: 'ShowDecks', params: { deckId } });
 };
 
+const goToCreateDeck = () => {
+  router.push('/create-deck');
+};
+
+const deleteFirstTenDecks = async () => {
+  try {
+    const allDecks = await apiGet(BASE_API_DECKS);
+    const decksToDelete = allDecks.slice(0, 10);
+
+    for (const deck of decksToDelete) {
+      await apiDelete(`${BASE_API_DECKS}/${deck.id}`);
+    }
+
+    await fetchDecks();
+    window.location.reload(); // Actualiser la page
+  } catch (error) {
+    console.error('Error deleting decks:', error);
+  }
+};
+
 onMounted(() => {
   fetchDecks();
 });
@@ -53,8 +72,10 @@ onMounted(() => {
 
 <template>
   <div class="container">
-    <SearchBar />
     <h1 class="title">My Decks</h1>
+
+    <button @click="goToCreateDeck" class="create-deck-button">Créer un nouveau deck avec vos propre carte</button>
+    <button @click="deleteFirstTenDecks" class="delete-empty-decks-button">Supprimer les 10 premiers decks</button>
     <div class="add-deck-form">
       <h2>Add New Deck</h2>
       <div v-if="errorMessage" class="error">{{ errorMessage }}</div>
@@ -78,6 +99,7 @@ onMounted(() => {
   justify-content: center;
   text-align: center;
   padding: 2rem;
+  position: relative;
 }
 
 .title {
@@ -85,6 +107,21 @@ onMounted(() => {
   font-weight: bold;
   margin-bottom: 2rem;
   color: #333;
+}
+
+.create-deck-button, .delete-empty-decks-button {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  margin: 0.5rem;
+}
+
+.create-deck-button:hover, .delete-empty-decks-button:hover {
+  background-color: #218838;
 }
 
 .add-deck-form {

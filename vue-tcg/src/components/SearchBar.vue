@@ -2,45 +2,55 @@
 import { ref, watch } from 'vue';
 
 const query = ref('');
+const storedCards = JSON.parse(window.localStorage.getItem('boosterCards')) || [];
 const filteredCards = ref([]);
+const selectedCards = ref([]);
 
 const searchCards = () => {
-  const storedCards = JSON.parse(window.localStorage.getItem('randomCards')) || [];
-  
-  if (query.value.length > 2) {
-    filteredCards.value = storedCards.filter(card => 
-      card.name.toLowerCase().includes(query.value.toLowerCase())
+  if (query.value.length > 0) {
+    filteredCards.value = storedCards.filter(card =>
+        card.name.toLowerCase().includes(query.value.toLowerCase()) ||
+        card.id.toLowerCase().includes(query.value.toLowerCase())
     );
   } else {
     filteredCards.value = [];
   }
 };
 
+const toggleCardSelection = (card) => {
+  const index = selectedCards.value.findIndex(c => c.id === card.id);
+  if (index === -1) {
+    selectedCards.value.push(card);
+  } else {
+    selectedCards.value.splice(index, 1);
+  }
+  $emit('select-card', selectedCards.value);
+};
+
 watch(query, searchCards);
+
+defineProps(['onSelectCard']);
 </script>
 
 <template>
-  <div>
-    <!-- Search bar -->
-    <input v-model="query" class="search-input" placeholder="Search Pokémon" />
-
-    <!-- Cards container -->
-    <div v-if="filteredCards.length" class="cards-container">
-        <img 
-          v-for="card in filteredCards" 
-          :src="card.image ? `${card.image}/low.jpg` : '/placeholder.jpg'" 
-          alt="Card Image" 
-          class="card-image" 
-        />
+  <input v-model="query" class="search-input" placeholder="Rechercher une carte" />
+  <h2>Carte trouvées </h2>
+  <div v-if="filteredCards.length" class="cards-container">
+    <div
+        v-for="card in filteredCards"
+        :key="card.id"
+        class="card-item"
+        :class="{ 'selected': selectedCards.includes(card) }"
+        @click="toggleCardSelection(card)"
+    >
+      <img :src="card.image ? `${card.image}/low.jpg` : '/placeholder.jpg'" alt="Card Image" />
+      <p>{{ card.name }}</p>
     </div>
-
-    <!-- No results message -->
-    <div v-else-if="query.length > 2" class="no-results">No cards found</div>
   </div>
+  <div v-else-if="query.length > 0" class="no-results">Aucune carte trouvée</div>
 </template>
 
 <style scoped>
-/* Search bar styling */
 .search-input {
   padding: 0.75rem 1rem;
   font-size: 1.2rem;
@@ -71,13 +81,18 @@ watch(query, searchCards);
   border-radius: 8px;
   text-align: center;
   width: calc(100% / 5 - 1rem);
-  transition: transform 0.2s ease-in-out;
   cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .card-item:hover {
-  transform: translateY(-5px);
-  background-color: #444;
+  transform: scale(1.1);
+}
+
+.card-item.selected {
+  border: 2px solid #ff6347;
+  background: linear-gradient(145deg, #400, #700);
+  box-shadow: 0 0 15px #ff6347;
 }
 
 .card-item img {
@@ -85,65 +100,9 @@ watch(query, searchCards);
   border-radius: 8px;
 }
 
-.card-image {
-  width: 35%;
-  height: auto;
-  border-radius: 8px;
-}
-
-.card-name {
-  font-size: 1rem;
-  font-weight: bold;
-  text-transform: capitalize;
-}
-
 .no-results {
   color: #888;
   font-size: 1.2rem;
   margin-top: 1rem;
-}
-
-.nav-link {
-  color: #fff;
-  text-decoration: none;
-  font-size: 1.2rem;
-  transition: color 0.3s ease, transform 0.3s ease;
-  background-color: #333;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  cursor: pointer;
-  margin: 0.5rem;
-}
-
-.nav-link:hover {
-  color: #ff6347;
-  transform: scale(1.1);
-}
-
-.title {
-  font-size: 2rem;
-  font-weight: bold;
-  text-align: center;
-  margin-bottom: 1rem;
-  color: #333;
-}
-
-.booster-btn {
-  background-color: #ff6347;
-  color: #fff;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: background-color 0.3s ease, transform 0.3s ease;
-  display: block;
-  margin: 0 auto 1rem;
-}
-
-.open-booster-btn:hover {
-  background-color: #e5533d;
-  transform: scale(1.05);
 }
 </style>

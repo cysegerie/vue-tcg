@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, nextTick } from 'vue';
+import { ref, onMounted } from 'vue';
 
 const boosters = ref([]);
 const selectedCard = ref(null);
@@ -48,7 +48,7 @@ const openBooster = async (booster) => {
   loading.value = false;
 };
 
-// Récupérer les cartes stockées
+// Récupérer les cartes stockées en lcoal
 const loadStoredCards = () => {
   storedCards.value = JSON.parse(localStorage.getItem('boosterCards')) || [];
 };
@@ -119,7 +119,7 @@ onMounted(() => {
   background-color: #0056b3;
 }
 
-.card-container, .stored-cards-container {
+.card-container {
   text-align: center;
 }
 
@@ -175,10 +175,4 @@ onMounted(() => {
   text-align: center;
 }
 
-.cards-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  justify-content: center;
-}
 </style>
