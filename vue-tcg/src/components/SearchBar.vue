@@ -6,12 +6,15 @@ const storedCards = JSON.parse(window.localStorage.getItem('boosterCards')) || [
 const filteredCards = ref([]);
 const selectedCards = ref([]);
 
+
+// Du coup ça affiche en pri orité les cartes qui commencent par la recherche
 const searchCards = () => {
   if (query.value.length > 0) {
     filteredCards.value = storedCards.filter(card =>
-        card.name.toLowerCase().includes(query.value.toLowerCase()) ||
-        card.id.toLowerCase().includes(query.value.toLowerCase())
-    );
+        card.name.toLowerCase().includes(query.value.toLowerCase())
+    ).sort((a) => {
+      return a.name.toLowerCase().startsWith(query.value.toLowerCase()) ? -1 : 1;
+    });
   } else {
     filteredCards.value = [];
   }
@@ -34,7 +37,7 @@ defineProps(['onSelectCard']);
 
 <template>
   <input v-model="query" class="search-input" placeholder="Rechercher une carte" />
-  <h2>Carte trouvées </h2>
+  <h2>Carte trouvées</h2>
   <div v-if="filteredCards.length" class="cards-container">
     <div
         v-for="card in filteredCards"
