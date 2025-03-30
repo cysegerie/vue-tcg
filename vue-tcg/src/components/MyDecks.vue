@@ -19,7 +19,7 @@ const fetchDecks = async () => {
 };
 
 const addDeck = async () => {
-  if (!newDeckName.value || !newDeckCards.value) {
+  if (!newDeckName.value.trim() || !newDeckCards.value) {
     errorMessage.value = 'All fields are required';
     return;
   }
