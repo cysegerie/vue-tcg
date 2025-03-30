@@ -40,48 +40,110 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.card-image{
-    margin-bottom: 2rem;
+.selected-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  background: var(--background-secondary);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-primary);
+  max-width: 800px;
+  margin: 2rem auto;
 }
-.card-image:hover {
-    transform: scale(1.1);
+
+.card-image {
+  width: 100%;
+  max-width: 400px;
+  height: auto;
+  border-radius: var(--border-radius);
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-primary);
 }
-.card-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+
+.card-info {
+  text-align: center;
+  color: white;
+}
+
+.card-name {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: white;
+}
+
+.card-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0;
+  color: white;
+}
+
+.detail-item {
+  background: var(--background-primary);
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-secondary);
+}
+
+.detail-label {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  color: white;
+}
+
+.detail-value {
+  color: white;
+}
+
+.card-description {
+  margin: 1.5rem 0;
+  line-height: 1.6;
+  color: white;
+}
+
+.card-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.action-button {
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: var(--border-radius);
+  background: var(--primary-color);
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.action-button:hover {
+  background: var(--primary-hover);
+  transform: translateY(-2px);
+}
+
+.action-button:disabled {
+  background: var(--text-secondary);
+  cursor: not-allowed;
+  transform: none;
+}
+
+@media (max-width: 768px) {
+  .selected-card {
     padding: 1rem;
-    border-radius: 8px;
-    color: #333;
-}
-.card-container h2 {
-    margin-bottom: 2rem;
-}
-.card-container img {
-    max-width: 100%;
-    border-radius: 8px;
-    margin-bottom: 1rem;
-}
+    margin: 1rem;
+  }
 
-.info-columns {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-}
+  .card-name {
+    font-size: 1.5rem;
+  }
 
-.column {
-    flex: 1;
-    padding: 0 1rem;
-}
-
-.types {
-    display: flex;
-    flex-direction: column;
-}
-
-.text-card {
-    color: #333;
-    text-decoration: none;
-    font-size: 1.2rem;
+  .card-details {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

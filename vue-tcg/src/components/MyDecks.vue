@@ -72,116 +72,261 @@ onMounted(() => {
 
 <template>
   <div class="container">
-    <h1 class="title">My Decks</h1>
+    <h1 class="title">Mes Decks</h1>
 
-    <button @click="goToCreateDeck" class="create-deck-button">Créer un nouveau deck avec vos propre carte</button>
-    <button @click="deleteFirstTenDecks" class="delete-empty-decks-button">Supprimer les 10 premiers decks</button>
-    <div class="add-deck-form">
-      <h2>Add New Deck</h2>
-      <div v-if="errorMessage" class="error">{{ errorMessage }}</div>
-      <input v-model="newDeckName" placeholder="Deck Name" class="input" />
-      <input v-model="newDeckCards" placeholder="Card IDs (comma separated)" class="input" />
-      <button @click="addDeck" class="add-button">Add Deck</button>
+    <div class="actions">
+      <button @click="goToCreateDeck" class="action-button create-button">
+        <span class="button-content">
+          <span class="button-text">Créer un nouveau deck</span>
+          <span class="button-icon">+</span>
+        </span>
+      </button>
+      <button @click="deleteFirstTenDecks" class="action-button delete-button">
+        <span class="button-content">
+          <span class="button-text">Supprimer les 10 premiers decks</span>
+          <span class="button-icon">🗑️</span>
+        </span>
+      </button>
     </div>
-    <ul class="deck-list">
-      <li v-for="deck in decks" :key="deck.id" @click="goToShowDecks(deck.id)" class="deck-item">
-        {{ deck.name }}
-      </li>
-    </ul>
+
+    <div class="add-deck-form">
+      <h2>Ajouter un nouveau deck</h2>
+      <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
+      <div class="form-group">
+        <label for="deckName">Nom du deck</label>
+        <input 
+          id="deckName" 
+          v-model="newDeckName" 
+          placeholder="Entrez le nom du deck (ex: Alexandre Ruiz le goat)" 
+          class="input" 
+        />
+      </div>
+      <div class="form-group">
+        <label for="deckCards">IDs des cartes (séparés par des virgules)</label>
+        <input 
+          id="deckCards" 
+          v-model="newDeckCards" 
+          placeholder="Ex: xy1-1, xy1-2, xy1-3" 
+          class="input" 
+        />
+      </div>
+      <button @click="addDeck" class="submit-button">
+        <span class="button-content">
+          <span class="button-text">Ajouter le deck</span>
+          <span class="button-icon">→</span>
+        </span>
+      </button>
+    </div>
+
+    <div class="decks-grid">
+      <div 
+        v-for="deck in decks" 
+        :key="deck.id" 
+        @click="goToShowDecks(deck.id)" 
+        class="deck-card"
+      >
+        <div class="deck-content">
+          <h3 class="deck-name">{{ deck.name }}</h3>
+          <div class="deck-info">
+            <span class="deck-count">{{ deck.cards.length }} cartes</span>
+            <span class="deck-id">ID: {{ deck.id }}</span>
+          </div>
+        </div>
+        <div class="deck-hover-effect"></div>
+      </div>
+    </div>
   </div>
 </template>
 
 <style scoped>
 .container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
   padding: 2rem;
-  position: relative;
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: linear-gradient(180deg, var(--background-color) 0%, rgba(26, 27, 30, 0.95) 100%);
 }
 
 .title {
-  font-size: 2rem;
-  font-weight: bold;
+  text-align: center;
   margin-bottom: 2rem;
-  color: #333;
 }
 
-.create-deck-button, .delete-empty-decks-button {
-  background-color: #28a745;
-  color: white;
+.actions {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.action-button {
+  padding: 1rem 2rem;
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
+  border-radius: var(--border-radius);
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.3s ease;
-  margin: 0.5rem;
+  transition: var(--transition);
+  flex: 1;
+  min-width: 200px;
 }
 
-.create-deck-button:hover, .delete-empty-decks-button:hover {
-  background-color: #218838;
+.create-button {
+  background: var(--gradient-primary);
+  color: white;
+  box-shadow: var(--shadow-primary);
+}
+
+.delete-button {
+  background: var(--gradient-secondary);
+  color: white;
+  box-shadow: var(--shadow-secondary);
+}
+
+.action-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(108, 99, 255, 0.3);
+}
+
+.button-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.button-icon {
+  transition: var(--transition);
+}
+
+.action-button:hover .button-icon {
+  transform: scale(1.1);
 }
 
 .add-deck-form {
-  width: 100%;
-  max-width: 500px;
+  background: var(--card-background);
+  padding: 2rem;
+  border-radius: var(--border-radius);
   margin-bottom: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--text-secondary);
+  font-weight: 500;
 }
 
 .input {
-  display: block;
   width: 100%;
-  max-width: 500px;
-  margin: 0.5rem 0;
-  padding: 0.75rem;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 1rem;
-}
-
-.add-button {
-  background-color: #ff6347;
-  color: #fff;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: background-color 0.3s ease, transform 0.3s ease;
-  display: block;
-  margin: 1rem auto;
-}
-
-.add-button:hover {
-  background-color: #e5533d;
-  transform: scale(1.05);
-}
-
-.error {
-  color: red;
-  margin-bottom: 1rem;
-}
-
-.deck-list {
-  list-style-type: none;
-  padding: 0;
-  width: 100%;
-  max-width: 500px;
-}
-
-.deck-item {
-  background-color: #f8f9fa;
-  margin: 0.5rem 0;
   padding: 1rem;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 1.2rem;
-  transition: background-color 0.3s ease;
+  border-radius: var(--border-radius);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  background: var(--background-color);
+  color: var(--text-primary);
+  font-size: 1rem;
+  transition: var(--transition);
 }
 
-.deck-item:hover {
-  background-color: #e2e6ea;
+.input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: var(--shadow-primary);
+}
+
+.submit-button {
+  width: 100%;
+  padding: 1rem;
+  border: none;
+  border-radius: var(--border-radius);
+  background: var(--gradient-primary);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: var(--shadow-primary);
+}
+
+.submit-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(108, 99, 255, 0.3);
+}
+
+.decks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.deck-card {
+  background: var(--card-background);
+  border-radius: var(--border-radius);
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: var(--transition);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.deck-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-primary);
+}
+
+.deck-content {
+  position: relative;
+  z-index: 1;
+}
+
+.deck-name {
+  color: var(--text-primary);
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.deck-info {
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.deck-hover-effect {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent, rgba(108, 99, 255, 0.1), transparent);
+  transform: translateX(-100%);
+  transition: var(--transition);
+}
+
+.deck-card:hover .deck-hover-effect {
+  transform: translateX(100%);
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+
+  .action-button {
+    width: 100%;
+  }
+
+  .decks-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

@@ -7,11 +7,16 @@ const isLoading = ref(false);
 const cards = ref([]);
 const totalFetched = ref(0);
 const currentPageApi = ref(1);
+const hasReachedEnd = ref(false);
 
 const itemsPerPageOptions = [10, 25, 50, 100];
 const savedItemsPerPage = localStorage.getItem('itemsPerPage');
 const itemsPerPage = ref(savedItemsPerPage ? parseInt(savedItemsPerPage, 10) : 10);
 const currentPage = ref(1);
+
+const isLastPage = computed(() => {
+    return hasReachedEnd.value && currentPage.value * itemsPerPage.value >= totalFetched.value;
+});
 
 async function loadMoreCards() {
     if (isLoading.value) return;
@@ -23,6 +28,8 @@ async function loadMoreCards() {
             cards.value.push(...data);
             totalFetched.value += data.length;
             currentPageApi.value += 1;
+        } else {
+            hasReachedEnd.value = true;
         }
     } finally {
         isLoading.value = false;
@@ -65,15 +72,27 @@ watch(currentPage, async (newPage) => {
                 </select>
                 <div class="pagination-trucs">
                     <button :disabled="currentPage === 1" @click="currentPage -= 1">Previous</button>
-                    <span>Page {{ currentPage }}</span>0
-                    <button :disabled="isLoading" @click="currentPage += 1">Next</button>
+                    <span>Page {{ currentPage }}</span>
+                    <button :disabled="isLoading || isLastPage" @click="currentPage += 1">Next</button>
                 </div>
             </div>
-            <div class="cards-container">
+            <div v-if="isLastPage" class="easter-egg">
+                <div class="easter-egg-content">
+                    <h2>🎉 Félicitations ! 🎉</h2>
+                    <p>Tu as atteint la dernière page !</p>
+                    <p class="joke">Pourquoi les Pokémon n'aiment-ils pas les escaliers ?</p>
+                    <p class="punchline">Parce qu'ils sont toujours à bout de souffle ! 😂</p>
+                    <button @click="currentPage = 1" class="return-button">
+                        Retour à la première page
+                    </button>
+                </div>
+            </div>
+            <div v-else class="cards-container">
                 <div v-for="card in displayedCards" :key="card.id" class="card-item">
                     <RouterLink :to="`/cards/${card.id}`" class="card-link">
                         <img :src="card.image ? `${card.image}/low.jpg` : '/placeholder.jpg'" alt="Card Image" />
-                        <p>{{ card.name }}</p>
+                        <p class="card-name">{{ card.name }}</p>
+                        <p class="card-id">ID: {{ card.id }}</p>
                     </RouterLink>
                 </div>
             </div>
@@ -111,6 +130,15 @@ watch(currentPage, async (newPage) => {
 .card-item img {
     max-width: 100%;
     border-radius: 8px;
+}
+.card-name {
+    margin: 0.5rem 0;
+    font-weight: 500;
+}
+.card-id {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #aaa;
 }
 .pagination {
     display: flex;
@@ -150,5 +178,57 @@ watch(currentPage, async (newPage) => {
     gap: 0.5rem;
     align-items: center;
     margin-right: 1.5rem;
+}
+.easter-egg {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+    padding: 2rem;
+    background: var(--card-background);
+    border-radius: var(--border-radius);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: 2rem;
+}
+.easter-egg-content {
+    text-align: center;
+    max-width: 500px;
+}
+.easter-egg h2 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    font-size: 2rem;
+}
+.easter-egg p {
+    color: var(--text-primary);
+    margin: 0.5rem 0;
+    font-size: 1.2rem;
+}
+.easter-egg .joke {
+    margin-top: 2rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+.easter-egg .punchline {
+    color: var(--primary-color);
+    font-weight: 600;
+    font-size: 1.3rem;
+    margin-top: 1rem;
+}
+.return-button {
+    margin-top: 2rem;
+    padding: 1rem 2rem;
+    background: var(--gradient-primary);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: var(--shadow-primary);
+}
+.return-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(108, 99, 255, 0.3);
 }
 </style>

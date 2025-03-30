@@ -37,7 +37,15 @@ watch(query, searchCards);
 
 <template>
   <div class="search-container">
-    <input v-model="query" class="search-input" placeholder="Rechercher une carte par nom ou ID..." />
+    <div class="search-input-container">
+      <input 
+        v-model="query" 
+        class="search-input" 
+        placeholder="Rechercher une carte par nom ou ID..." 
+        type="text"
+      />
+      <span class="search-icon">🔍</span>
+    </div>
     
     <div v-if="query.length > 0" class="search-results">
       <h2>Résultats de recherche</h2>
@@ -49,11 +57,22 @@ watch(query, searchCards);
             :class="{ 'new-selected': selectedCards.some(c => c.id === card.id) }"
             @click="toggleCardSelection(card)"
         >
-          <img :src="card.image ? `${card.image}/low.jpg` : '/placeholder.jpg'" alt="Card Image" />
-          <p>{{ card.name }}</p>
+          <div class="card-image-container">
+            <img :src="card.image ? `${card.image}/low.jpg` : '/placeholder.jpg'" alt="Card Image" />
+            <div class="card-overlay">
+              <div class="card-types" v-if="card.types">
+                <span v-for="type in card.types" :key="type" class="type-badge">{{ type }}</span>
+              </div>
+            </div>
+          </div>
+          <p class="card-name">{{ card.name }}</p>
+          <p class="card-id">ID: {{ card.id }}</p>
         </div>
       </div>
-      <div v-else class="no-results">Aucune carte trouvée</div>
+      <div v-else class="no-results">
+        <span class="no-results-icon">🔍</span>
+        <p>Aucune carte trouvée</p>
+      </div>
     </div>
   </div>
 </template>
@@ -62,70 +81,188 @@ watch(query, searchCards);
 .search-container {
   width: 100%;
   margin-bottom: 2rem;
+  max-width: 500px;
+}
+
+.search-input-container {
+  position: relative;
+  width: 100%;
 }
 
 .search-input {
-  padding: 10px;
-  font-size: 1.2rem;
-  border: 2px solid #ccc;
-  border-radius: 8px;
   width: 100%;
-  max-width: 400px;
-  margin-bottom: 1rem;
-  transition: border-color 0.3s;
+  padding: 1rem 3rem 1rem 1.5rem;
+  font-size: 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--border-radius);
+  background: var(--card-background);
+  color: var(--text-primary);
+  transition: var(--transition);
 }
 
 .search-input:focus {
-  border-color: #ff6347;
   outline: none;
+  border-color: var(--primary-color);
+  box-shadow: var(--shadow-primary);
+}
+
+.search-icon {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+  font-size: 1.2rem;
+  pointer-events: none;
 }
 
 .search-results {
-  margin-top: 1rem;
+  margin-top: 2rem;
+  padding: 1rem;
+  background: var(--card-background);
+  border-radius: var(--border-radius);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  width: 100%;
+}
+
+.search-results h2 {
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
 }
 
 .cards-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.5rem;
 }
 
 .card-item {
-  background-color: #222;
-  color: #fff;
-  padding: 10px;
-  border-radius: 8px;
-  text-align: center;
-  width: 150px;
+  background: var(--background-color);
+  border-radius: var(--border-radius);
+  padding: 1rem;
+  transition: var(--transition);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .card-item:hover {
-  transform: scale(1.05);
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-primary);
 }
 
-.card-item img {
-  max-width: 100%;
-  border-radius: 8px;
+.card-image-container {
+  position: relative;
+  width: 100%;
+  padding-top: 140%;
+  margin-bottom: 1rem;
+  border-radius: var(--border-radius);
+  overflow: hidden;
 }
 
-.no-results {
-  color: #888;
-  font-size: 1.2rem;
-  margin-top: 1rem;
+.card-image-container img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--border-radius);
+  transition: var(--transition);
+}
+
+.card-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1rem;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+  transform: translateY(100%);
+  transition: var(--transition);
+}
+
+.card-item:hover .card-overlay {
+  transform: translateY(0);
+}
+
+.card-types {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.type-badge {
+  background: var(--gradient-secondary);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.card-name {
+  color: var(--text-primary);
+  font-weight: 500;
+  margin: 0.5rem 0;
   text-align: center;
 }
 
-.card-item.new-selected {
-  outline: 3px solid #ffcc00;
-  background: linear-gradient(145deg, #ffcc00, #ff9900);
-  transform: scale(1.05);
-  box-shadow: 0 0 15px rgba(255, 204, 0, 0.8);
+.card-id {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  text-align: center;
 }
 
-.card-item.new-selected img {
-  filter: brightness(1.2);
+.no-results {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.no-results-icon {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.card-item.new-selected {
+  border-color: var(--primary-color);
+  box-shadow: var(--shadow-primary);
+}
+
+.card-item.new-selected::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: 2px solid var(--primary-color);
+  border-radius: var(--border-radius);
+  pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  .search-input {
+    font-size: 1rem;
+    padding: 0.8rem 2.5rem 0.8rem 1rem;
+  }
+
+  .search-icon {
+    right: 0.8rem;
+    font-size: 1rem;
+  }
+
+  .cards-container {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+  }
 }
 </style>

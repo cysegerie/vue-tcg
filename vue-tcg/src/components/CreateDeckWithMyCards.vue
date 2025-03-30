@@ -87,16 +87,16 @@ const createDeck = async () => {
     return;
   }
 
-  // Créer le deck avec toutes les informations des cartes
+  // Créer le deck avec les IDs des cartes répétés selon la quantité
+  const cardIds = selectedCards.value.flatMap(card => {
+    const quantity = cardQuantities.value[card.id];
+    return Array(quantity).fill(card.id);
+  });
+
   const newDeck = {
     name: deckName.value,
     idUser: Math.floor(Math.random() * 10) + 1,
-    cards: selectedCards.value.map(card => ({
-      id: card.id,
-      name: card.name,
-      image: card.image,
-      quantity: cardQuantities.value[card.id]
-    }))
+    cards: cardIds
   };
 
   try {
@@ -129,18 +129,25 @@ watch(() => window.localStorage.getItem('boosterCards'), (newValue) => {
 
 <template>
   <div class="create-deck-container">
-    <h1>Créer un nouveau deck avec vos propres cartes</h1>
+    <h1>Créer un nouveau deck</h1>
+    <p class="subtitle">Construisez votre deck avec vos cartes Pokémon</p>
 
     <div class="deck-form">
-      <label for="deckName">Nom du deck :</label>
-      <input id="deckName" v-model="deckName" type="text" placeholder="Entrez le nom du deck" class="deck-name-input" />
+      <label for="deckName">Nom du deck</label>
+      <input 
+        id="deckName" 
+        v-model="deckName" 
+        type="text" 
+        placeholder="Entrez le nom du deck (ex: Alexandre Ruiz le goat)" 
+        class="deck-name-input" 
+      />
       <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
     </div>
 
     <SearchBar :selected-cards="selectedCards" @select-card="toggleCardSelection" />
 
     <div class="all-cards-section">
-      <h2>Toutes vos cartes</h2>
+      <h2>Vos cartes disponibles</h2>
       <div class="cards-container">
         <div
             v-for="card in storedCards"
@@ -148,8 +155,16 @@ watch(() => window.localStorage.getItem('boosterCards'), (newValue) => {
             class="card-item"
             :class="{ 'new-selected': cardQuantities[card.id] > 0 }"
         >
-          <img :src="card.image ? `${card.image}/low.jpg` : '/placeholder.jpg'" alt="Card Image" />
-          <p>{{ card.name }}</p>
+          <div class="card-image-container">
+            <img :src="card.image ? `${card.image}/low.jpg` : '/placeholder.jpg'" alt="Card Image" />
+            <div class="card-overlay">
+              <div class="card-types" v-if="card.types">
+                <span v-for="type in card.types" :key="type" class="type-badge">{{ type }}</span>
+              </div>
+            </div>
+          </div>
+          <p class="card-name">{{ card.name }}</p>
+          <p class="card-id">ID: {{ card.id }}</p>
           <div class="quantity-controls">
             <button 
               @click.stop="updateQuantity(card, -1)" 
@@ -167,7 +182,12 @@ watch(() => window.localStorage.getItem('boosterCards'), (newValue) => {
       </div>
     </div>
 
-    <button @click="createDeck" class="create-deck-button">Créer le deck</button>
+    <button @click="createDeck" class="create-deck-button">
+      <span class="button-content">
+        <span class="button-text">Créer le deck</span>
+        <span class="button-icon">→</span>
+      </span>
+    </button>
   </div>
 </template>
 
@@ -176,91 +196,133 @@ watch(() => window.localStorage.getItem('boosterCards'), (newValue) => {
   padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
+  min-height: 100vh;
+  background: linear-gradient(180deg, var(--background-color) 0%, rgba(26, 27, 30, 0.95) 100%);
+}
+
+.subtitle {
+  color: var(--text-secondary);
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
 }
 
 .deck-form {
   margin-bottom: 2rem;
+  max-width: 500px;
+}
+
+.deck-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--text-secondary);
+  font-weight: 500;
 }
 
 .deck-name-input {
-  display: block;
   width: 100%;
-  max-width: 500px;
-  margin: 0.5rem 0;
-  padding: 0.75rem;
-  border-radius: 8px;
-  border: 2px solid #ccc;
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  background: var(--card-background);
+  color: var(--text-primary);
   font-size: 1rem;
-  background-color: #f8f9fa;
+  transition: var(--transition);
 }
 
-.create-deck-button {
-  position: fixed;
-  bottom: 1rem;
-  right: 1rem;
-  padding: 0.8rem 1.5rem;
-  border: none;
-  border-radius: 12px;
-  background: linear-gradient(145deg, #ff6347, #b0301e);
-  color: white;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 0 15px rgba(255, 99, 71, 0.7);
-  z-index: 1000;
-}
-
-.create-deck-button:hover {
-  box-shadow: 0 0 25px rgba(255, 99, 71, 1);
-}
-
-.error-message {
-  color: red;
-  font-weight: bold;
-  margin-top: 1rem;
-  text-align: center;
+.deck-name-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: var(--shadow-primary);
 }
 
 .all-cards-section {
-  margin-top: 2rem;
+  margin-top: 3rem;
 }
 
 .cards-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
 }
 
 .card-item {
-  background-color: #333;
-  color: #fff;
-  padding: 0.5rem;
-  border-radius: 8px;
-  text-align: center;
-  width: calc(100% / 5 - 1rem);
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  background: var(--card-background);
+  border-radius: var(--border-radius);
+  padding: 1rem;
+  transition: var(--transition);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
 }
 
 .card-item:hover {
-  transform: scale(1.1);
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-primary);
 }
 
-.card-item img {
-  max-width: 100%;
-  border-radius: 8px;
+.card-image-container {
+  position: relative;
+  width: 100%;
+  padding-top: 140%;
+  margin-bottom: 1rem;
+  border-radius: var(--border-radius);
+  overflow: hidden;
 }
 
-.card-item.new-selected {
-  outline: 3px solid #ffcc00;
-  background: linear-gradient(145deg, #ffcc00, #ff9900);
-  transform: scale(1.05);
-  box-shadow: 0 0 15px rgba(255, 204, 0, 0.8);
+.card-image-container img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--border-radius);
+  transition: var(--transition);
 }
 
-.card-item.new-selected img {
-  filter: brightness(1.2);
+.card-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1rem;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+  transform: translateY(100%);
+  transition: var(--transition);
+}
+
+.card-item:hover .card-overlay {
+  transform: translateY(0);
+}
+
+.card-types {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.type-badge {
+  background: var(--gradient-secondary);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.card-name {
+  color: var(--text-primary);
+  font-weight: 500;
+  margin: 0.5rem 0;
+  text-align: center;
+}
+
+.card-id {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  text-align: center;
 }
 
 .quantity-controls {
@@ -272,34 +334,105 @@ watch(() => window.localStorage.getItem('boosterCards'), (newValue) => {
 }
 
 .quantity-btn {
-  background-color: #ff6347;
+  background: var(--gradient-primary);
   color: white;
   border: none;
   border-radius: 50%;
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   font-size: 1.2rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.2s;
+  transition: var(--transition);
 }
 
-.quantity-btn:hover {
-  background-color: #ff4500;
+.quantity-btn:not(:disabled):hover {
+  transform: scale(1.1);
+  box-shadow: var(--shadow-primary);
 }
 
 .quantity-btn:disabled {
-  background-color: #ccc;
+  background: var(--text-secondary);
   cursor: not-allowed;
-  opacity: 0.7;
+  opacity: 0.5;
 }
 
 .quantity {
-  font-size: 1.2rem;
-  font-weight: bold;
+  font-size: 1rem;
+  font-weight: 600;
   min-width: 48px;
   text-align: center;
+  color: var(--text-primary);
+}
+
+.create-deck-button {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: var(--border-radius);
+  background: var(--gradient-primary);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: var(--shadow-primary);
+  z-index: 1000;
+}
+
+.button-content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.button-icon {
+  transition: var(--transition);
+}
+
+.create-deck-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(108, 99, 255, 0.3);
+}
+
+.create-deck-button:hover .button-icon {
+  transform: translateX(5px);
+}
+
+.card-item.new-selected {
+  border-color: var(--primary-color);
+  box-shadow: var(--shadow-primary);
+}
+
+.card-item.new-selected::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: 2px solid var(--primary-color);
+  border-radius: var(--border-radius);
+  pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  .create-deck-container {
+    padding: 1rem;
+  }
+
+  .cards-container {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+  }
+
+  .create-deck-button {
+    bottom: 1rem;
+    right: 1rem;
+    padding: 0.8rem 1.5rem;
+  }
 }
 </style>

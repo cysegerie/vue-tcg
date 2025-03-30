@@ -4,10 +4,18 @@ import {fetchCards} from '@/services/CardService.js';
 
 const storedCards = ref([]);
 const selectedCards = ref([]);
+const cardQuantities = ref({});
+const availableQuantities = ref({});
 const newCardObtained = ref(null);
 
 onMounted(() => {
-  storedCards.value = JSON.parse(window.localStorage.getItem('boosterCards')) || [];
+  const allCards = JSON.parse(window.localStorage.getItem('boosterCards')) || [];
+  storedCards.value = allCards;
+  
+  allCards.forEach(card => {
+    availableQuantities.value[card.id] = (availableQuantities.value[card.id] || 0) + 1;
+    cardQuantities.value[card.id] = 0;
+  });
 });
 
 const countedCards = computed(() => {
@@ -23,13 +31,15 @@ const countedCards = computed(() => {
 });
 
 const toggleCardSelection = (card) => {
-  const index = selectedCards.value.findIndex(c => c.id === card.id);
-  if (index === -1) {
-    if (selectedCards.value.length < 4) {
-      selectedCards.value.push(card);
-    }
+  const currentQuantity = cardQuantities.value[card.id] || 0;
+  const availableQuantity = availableQuantities.value[card.id] || 0;
+  
+  if (currentQuantity < availableQuantity) {
+    cardQuantities.value[card.id] = currentQuantity + 1;
+    selectedCards.value.push(card);
   } else {
-    selectedCards.value.splice(index, 1);
+    cardQuantities.value[card.id] = 0;
+    selectedCards.value = selectedCards.value.filter(c => c.id !== card.id);
   }
 };
 
@@ -51,6 +61,12 @@ const destroyCardsAndGetNew = async () => {
   window.localStorage.setItem('boosterCards', JSON.stringify(updatedCards));
   storedCards.value = updatedCards;
   selectedCards.value = [];
+  cardQuantities.value = {};
+  
+  updatedCards.forEach(card => {
+    availableQuantities.value[card.id] = (availableQuantities.value[card.id] || 0) + 1;
+    cardQuantities.value[card.id] = 0;
+  });
 
   newCardObtained.value = newCard;
 
@@ -70,12 +86,16 @@ const destroyCardsAndGetNew = async () => {
           v-for="card in countedCards"
           :key="card.id"
           class="card-item"
-          :class="{ 'selected': selectedCards.includes(card) }"
+          :class="{ 'selected': cardQuantities[card.id] > 0 }"
           @click="toggleCardSelection(card)"
       >
         <img :src="card.image ? `${card.image}/low.jpg` : '/placeholder.jpg'" alt="Card Image" />
-        <p>{{ card.name }}</p>
-        <p>Quantité: {{ card.quantity }}</p>
+        <p class="card-name">{{ card.name }}</p>
+        <p class="card-id">ID: {{ card.id }}</p>
+        <p class="card-quantity">Quantité: {{ card.quantity }}</p>
+        <p class="selected-quantity" v-if="cardQuantities[card.id] > 0">
+          Sélectionnée: {{ cardQuantities[card.id] }}
+        </p>
       </div>
     </div>
 
@@ -94,7 +114,6 @@ const destroyCardsAndGetNew = async () => {
 
   <div v-if="newCardObtained" class="new-card-popup" @click="newCardObtained = null">
     <h2>🎉 Nouvelle Carte Obtenue ! 🎉</h2>
-    <!--suppress JSObjectNullOrUndefined -->
     <img :src="newCardObtained.image ? `${newCardObtained.image}/low.jpg` : '/placeholder.jpg'" alt="Nouvelle carte" />
     <p>{{ newCardObtained.name }}</p>
   </div>
@@ -195,5 +214,35 @@ const destroyCardsAndGetNew = async () => {
     transform: translate(-50%, -50%) scale(1);
     opacity: 1;
   }
+}
+
+.card-quantity {
+  margin: 0.5rem 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.selected-quantity {
+  margin: 0;
+  color: var(--primary-color);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.card-item.selected {
+  border-color: var(--primary-color);
+  box-shadow: var(--shadow-primary);
+}
+
+.card-item.selected::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: 2px solid var(--primary-color);
+  border-radius: var(--border-radius);
+  pointer-events: none;
 }
 </style>
