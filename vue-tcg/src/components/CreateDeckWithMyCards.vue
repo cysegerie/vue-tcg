@@ -72,7 +72,7 @@ const checkDeckNameExists = async (name) => {
 };
 
 const createDeck = async () => {
-  if (!deckName.value) {
+  if (!deckName.value.trim()) {
     errorMessage.value = 'Veuillez entrer un nom de deck.';
     return;
   }
