@@ -61,7 +61,7 @@ const destroyCardsAndGetNew = async () => {
 </script>
 
 <template>
-  <h1>Homme</h1>
+  <h1>Home</h1>
   <h2>Vos cartes</h2>
 
   <div v-if="countedCards.length">

@@ -1,68 +1,78 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, defineEmits, defineProps } from 'vue';
+
+const props = defineProps({
+  selectedCards: {
+    type: Array,
+    default: () => []
+  }
+});
 
 const query = ref('');
-const storedCards = JSON.parse(window.localStorage.getItem('boosterCards')) || [];
-const filteredCards = ref([]);
-const selectedCards = ref([]);
+const allCards = JSON.parse(window.localStorage.getItem('boosterCards')) || [];
+// Filtrer les doublons en gardant uniquement la première occurrence de chaque carte
+const storedCards = allCards.filter((card, index, self) =>
+  index === self.findIndex((c) => c.id === card.id)
+);
+const filteredCards = ref([...storedCards]);
 
+const emit = defineEmits(['select-card']);
 
-// Du coup ça affiche en pri orité les cartes qui commencent par la recherche
 const searchCards = () => {
-  if (query.value.length > 0) {
-    filteredCards.value = storedCards.filter(card =>
-        card.name.toLowerCase().includes(query.value.toLowerCase())
-    ).sort((a) => {
-      return a.name.toLowerCase().startsWith(query.value.toLowerCase()) ? -1 : 1;
-    });
-  } else {
-    filteredCards.value = [];
-  }
+  const searchTerm = query.value.toLowerCase().trim();
+  filteredCards.value = searchTerm
+      ? storedCards.filter(card => {
+          const cardName = card.name.toLowerCase().trim();
+          return cardName.startsWith(searchTerm);
+      })
+      : [...storedCards];
 };
 
 const toggleCardSelection = (card) => {
-  const index = selectedCards.value.findIndex(c => c.id === card.id);
-  if (index === -1) {
-    selectedCards.value.push(card);
-  } else {
-    selectedCards.value.splice(index, 1);
-  }
-  $emit('select-card', selectedCards.value);
+  emit('select-card', card);
 };
 
 watch(query, searchCards);
-
-defineProps(['onSelectCard']);
 </script>
 
 <template>
-  <input v-model="query" class="search-input" placeholder="Rechercher une carte" />
-  <h2>Carte trouvées</h2>
-  <div v-if="filteredCards.length" class="cards-container">
-    <div
-        v-for="card in filteredCards"
-        :key="card.id"
-        class="card-item"
-        :class="{ 'selected': selectedCards.includes(card) }"
-        @click="toggleCardSelection(card)"
-    >
-      <img :src="card.image ? `${card.image}/low.jpg` : '/placeholder.jpg'" alt="Card Image" />
-      <p>{{ card.name }}</p>
+  <div class="search-container">
+    <input v-model="query" class="search-input" placeholder="Rechercher une carte par nom ou ID..." />
+    
+    <div v-if="query.length > 0" class="search-results">
+      <h2>Résultats de recherche</h2>
+      <div v-if="filteredCards.length" class="cards-container">
+        <div
+            v-for="card in filteredCards"
+            :key="card.id"
+            class="card-item"
+            :class="{ 'new-selected': selectedCards.some(c => c.id === card.id) }"
+            @click="toggleCardSelection(card)"
+        >
+          <img :src="card.image ? `${card.image}/low.jpg` : '/placeholder.jpg'" alt="Card Image" />
+          <p>{{ card.name }}</p>
+        </div>
+      </div>
+      <div v-else class="no-results">Aucune carte trouvée</div>
     </div>
   </div>
-  <div v-else-if="query.length > 0" class="no-results">Aucune carte trouvée</div>
 </template>
 
 <style scoped>
-.search-input {
-  padding: 0.75rem 1rem;
-  font-size: 1.2rem;
-  border-radius: 10px;
-  border: 2px solid #ccc;
+.search-container {
   width: 100%;
-  max-width: 500px;
+  margin-bottom: 2rem;
+}
+
+.search-input {
+  padding: 10px;
+  font-size: 1.2rem;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 400px;
   margin-bottom: 1rem;
-  transition: border-color 0.3s ease;
+  transition: border-color 0.3s;
 }
 
 .search-input:focus {
@@ -70,32 +80,30 @@ defineProps(['onSelectCard']);
   outline: none;
 }
 
+.search-results {
+  margin-top: 1rem;
+}
+
 .cards-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 10px;
   justify-content: center;
 }
 
 .card-item {
-  background-color: #333;
+  background-color: #222;
   color: #fff;
-  padding: 0.5rem;
+  padding: 10px;
   border-radius: 8px;
   text-align: center;
-  width: calc(100% / 5 - 1rem);
+  width: 150px;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .card-item:hover {
-  transform: scale(1.1);
-}
-
-.card-item.selected {
-  border: 2px solid #ff6347;
-  background: linear-gradient(145deg, #400, #700);
-  box-shadow: 0 0 15px #ff6347;
+  transform: scale(1.05);
 }
 
 .card-item img {
@@ -107,5 +115,17 @@ defineProps(['onSelectCard']);
   color: #888;
   font-size: 1.2rem;
   margin-top: 1rem;
+  text-align: center;
+}
+
+.card-item.new-selected {
+  outline: 3px solid #ffcc00;
+  background: linear-gradient(145deg, #ffcc00, #ff9900);
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(255, 204, 0, 0.8);
+}
+
+.card-item.new-selected img {
+  filter: brightness(1.2);
 }
 </style>
