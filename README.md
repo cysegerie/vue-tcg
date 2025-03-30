@@ -30,6 +30,12 @@ Une fois le serveur de développement démarré, ouvrez votre navigateur et acc�
 http://localhost:8080
 ```
 
+# Easter egg
+
+Une blague est caché dans la page All My Cards, si vous comprenez la blague, je veux bien que vous nous envoyez un mail. De notre côté, on l'a toujours pas comprise.
+
+*indice :* un autocliquer aidera
+
 ## Auteurs
 
 - **Yannis Doumir Fernandes**
